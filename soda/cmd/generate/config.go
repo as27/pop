@@ -2,7 +2,7 @@ package generate
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/gobuffalo/envy"
@@ -30,7 +30,7 @@ var ConfigCmd = &cobra.Command{
 		}
 		data := map[string]interface{}{
 			"dialect":     dialect,
-			"name":        path.Base(dir),
+			"name":        filepath.Base(dir),
 			"packagePath": pkgPath(),
 		}
 		return GenerateConfig(cfgFile, data)
@@ -41,7 +41,10 @@ func pkgPath() string {
 	pwd, _ := os.Getwd()
 
 	for _, p := range envy.GoPaths() {
-		pwd = strings.TrimPrefix(pwd, p)
+		pwd = filepath.ToSlash(strings.TrimPrefix(pwd, p))
+		// Trim slash because Windows still has the slash here and the
+		// template does not expect a slash.
+		pwd = strings.TrimLeft(pwd, "/")
 	}
 	return pwd
 }
