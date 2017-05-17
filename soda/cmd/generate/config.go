@@ -48,6 +48,10 @@ func pkgPath() string {
 
 func GenerateConfig(cfgFile string, data map[string]interface{}) error {
 	dialect = strings.ToLower(data["dialect"].(string))
+	packagePath := data["packagePath"].(string)
+	if strings.HasPrefix(dialect, "sqlite") && !strings.HasPrefix(packagePath, "src") {
+		data["packagePath"] = "src/" + packagePath
+	}
 	if t, ok := configTemplates[dialect]; ok {
 		g := makr.New()
 		g.Add(makr.NewFile(cfgFile, t))
